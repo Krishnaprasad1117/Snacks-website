@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .navbar {
+            background-color: #ff1744;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #ff1744;
+            color: white;
+        }
+
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        .completed {
+            background-color: #28a745;
+        }
+
+        .rejected {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">Owner Dashboard</div>
+    <div class="container">
+        <h2>Customer Orders</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Items</th>
+                    <th>Total Amount</th>
+                    <th>Delivery Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="order-table-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+        function populateOrders() {
+            const tbody = document.getElementById('order-table-body');
+            tbody.innerHTML = '';
+
+            orders.forEach((order, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${order.name}</td>
+                    <td>${order.phone}</td>
+                    <td>${order.address}</td>
+                    <td>${order.items.map(item => `${item.quantity}x ${item.name}`).join(', ')}</td>
+                    <td>₹${order.totalAmount}</td>
+                    <td>${order.deliveryDate}</td>
+                    <td id="status-${index}" class="status ${order.status ? order.status.toLowerCase() : ''}">
+                        ${order.status || 'Pending'}
+                    </td>
+                    <td>
+                        <select onchange="updateOrderStatus(${index}, this.value)">
+                            <option value="">Select Action</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateOrderStatus(index, status) {
+            if (!status) return;
+
+            // Update the status in the local storage orders array
+            orders[index].status = status;
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            // Update the status in the table
+            const statusCell = document.getElementById(`status-${index}`);
+            statusCell.textContent = status;
+            statusCell.className = `status ${status.toLowerCase()}`;
+        }
+
+        // Populate the orders table on page load
+        populateOrders();
+    </script>
+</body>
+</html>
